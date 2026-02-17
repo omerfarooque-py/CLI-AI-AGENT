@@ -1,4 +1,5 @@
 import os
+from google.genai import types
 
 def get_file_content(working_directory, file_path):
     
@@ -46,3 +47,22 @@ def write_file(working_directory, file_path, content):
     except Exception as e:
         return f"Error: {str(e)}"
     
+  
+schema_get_file_content = types.FunctionDeclaration(
+    name="get_file_content",
+    description="reads content of a specified file relative to the working directory, providing the content of the file",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={ 
+            "directory": types.Schema(
+                type=types.Type.STRING,
+                description="Directory path to the file to read, relative to the working directory",
+            ),
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="Name of the file to read",
+            ),
+        },
+        
+    ),
+)

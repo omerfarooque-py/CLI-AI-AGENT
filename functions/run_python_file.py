@@ -1,5 +1,6 @@
 import os
 import subprocess
+from google.genai import types
 
 def run_python_file(working_directory, file_path, args= None):
     #absolute path of the working directory
@@ -44,3 +45,27 @@ STDERR: {CompletedProcess.stderr}
     
     else:
          return f'Error: "{file_path}" is not a Python file'   
+     
+
+schema_run_python_file = types.FunctionDeclaration(
+    name="run_python_file",
+    description="Runs a Pythonf file with python3 interpreter, accepts additional CLI args as an optional Array, and provides the output of the script execution. The file path is relative to the working directory.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="Python file to run, relative to the working directory",
+            ),
+            "args": types.Schema(
+                type=types.Type.ARRAY,
+                  description="Optional array of command-line arguments to pass to the Python file",
+                  items=types.Schema(
+                    type=types.Type.STRING,
+              
+              ),   
+           
+            ),       
+        },
+    ),
+)     
