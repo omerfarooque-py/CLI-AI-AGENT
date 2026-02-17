@@ -7,6 +7,8 @@ from google.genai import types
 from functions.get_files_info import  schema_get_files_info, schema_write_file
 from functions.run_python_file import schema_run_python_file
 from functions.get_file_content import schema_get_file_content
+from functions.call_function import call_function
+
 
 def main():
 
@@ -72,10 +74,21 @@ def main():
 
     if response.function_calls:
         for function_call in response.function_calls:
-            print(f"Calling function: {function_call.name}({function_call.args})")
+          function_call_result = call_function(function_call, verbose)
+          print(f"Function call result: {function_call_result}")
+          
+    try:      
+        if function_call_result.parts is not None:
+          print(f"Function call result: {function_call_result}")
+        if function_call_result.parts[0].response is not None and function_call_result.parts[0].response.get("result") is not None:
+          print(f"Function call response: {function_call_result.parts[0].response}")   
+        if args.verbose:
+         print(f"-> {function_call_result.parts[0].function_response.response}")          
+    except Exception as e:
+        print(f"Error processing function call result: {e}")
     else:
-        print(response.text)
-    
+      print(response.text)
+      
     
 main()
 
