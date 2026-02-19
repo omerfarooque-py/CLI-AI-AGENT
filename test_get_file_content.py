@@ -7,4 +7,6 @@ def main():
     print(get_file_content(working_directory, "pkg/calculator.py"))
     print(get_file_content(working_directory, "/bin/cat")) 
     print(get_file_content(working_directory, "pkg/does_not_exist.py"))
+    print(get_file_content(working_directory, "README.md"))  # This should error out because it's a directory
+    
 main()    

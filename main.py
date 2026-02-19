@@ -49,7 +49,7 @@ def main():
         - Write content to files
         - Run Python scripts
 
-        All paths you provide should be relative to the working directory. You do not need to specify the working directory in your function calls as it is automatically injected for security reasons.
+        All paths you provide should be relative to the working_directory. You do not need to specify the working directory in your function calls as it is automatically injected for security reasons.
         """
     response = client.models.generate_content(
         model = 'gemini-2.5-flash',
