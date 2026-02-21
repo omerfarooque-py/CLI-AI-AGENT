@@ -51,43 +51,64 @@ def main():
 
         All paths you provide should be relative to the working_directory. You do not need to specify the working directory in your function calls as it is automatically injected for security reasons.
         """
-    response = client.models.generate_content(
-        model = 'gemini-2.5-flash',
-        contents = messages,
-        config=types.GenerateContentConfig(
-            tools = [available_functions],
-            system_instruction=system_prompt,
-            temperature=0
-    )
+    max_attempts = 20    
+    for i in range(0, max_attempts):# Allow up to 20 attempts   
+        if i == max_attempts - 1:
+            print("Maximum attempts reached. Exiting.")
+            return
+        response = client.models.generate_content(
+            model = 'gemini-2.5-flash',
+            contents = messages,
+            config=types.GenerateContentConfig(
+                tools = [available_functions],
+                system_instruction=system_prompt,
+                temperature=0
         )
-    
-    
-    print(response.text)
+            )
 
-    if response is None or response.usage_metadata is None:
-        print("response or usage metadata has malfunctioned") 
-        return
-    if args.verbose:
-        print(f"User prompt: {args.user_prompt}")
-        print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
-        print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
-
-    if response.function_calls:
-        for function_call in response.function_calls:
-          function_call_result = call_function(function_call, verbose)
-          print(f"Function call result: {function_call_result}")
-          
-    try:      
-        if function_call_result.parts is not None:
-          print(f"Function call result: {function_call_result}")
-        if function_call_result.parts[0].response is not None and function_call_result.parts[0].response.get("result") is not None:
-          print(f"Function call response: {function_call_result.parts[0].response}")   
+        if response is None or response.usage_metadata is None:
+            print("response or usage metadata has malfunctioned") 
+            return
         if args.verbose:
-         print(f"-> {function_call_result.parts[0].function_response.response}")          
-    except Exception as e:
-        print(f"Error processing function call result: {e}")
-    else:
-      print(response.text)
+            print(f"User prompt: {args.user_prompt}")
+            print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
+            print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
+
+        
+        if response.candidates:
+            for candidate in response.candidates:
+                if candidate is None or candidate.content is None:
+                    continue
+                messages.append(candidate.content)
+             
+        if response.function_calls:
+            function_respone = []
+            for function_call in response.function_calls:
+              function_call_result = call_function(function_call, verbose) 
+              function_respone.append(
+                 types.Part.from_function_response(
+                     name = function_call.name,
+                     response = {"result": function_call_result}
+                 )
+             )
+            messages.append(types.Content(
+                role="tool",
+                parts=function_respone
+            ))
+            continue
+
+              
+        try:      
+            if function_call_result.parts is not None:
+             print(f"Function call result: {function_call_result}")
+            if function_call_result.parts[0].response is not None and function_call_result.parts[0].response.get("result") is not None:
+             print(f"Function call response: {function_call_result.parts[0].response}")   
+            if args.verbose:
+             print(f"-> {function_call_result.parts[0].function_response.response}")          
+        except Exception as e:
+            print(f"Error processing function call result: {e}")
+        else:
+         print(response.text)
       
     
 main()

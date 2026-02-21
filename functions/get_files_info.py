@@ -23,8 +23,8 @@ def get_files_info(working_directory, directory="."):
         
   except Exception as e:
        return f"Error: {str(e)}"
-  print(f"result for '{directory}' directory:") 
   return response
+  
   
   
   

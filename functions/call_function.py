@@ -37,30 +37,23 @@ def call_function(function_call, verbose=False):
    # print(f"args after adding working_directory: {args}")
     #print(f"function_result parameter after assignment case 2: {get_file_content(working_directory, **args)}")
     
-    if "filename" in args:
-        args["file_path"] = args.pop("filename") # Remove "filename" from args if it exists, as it's not needed for the function calls and can cause issues with unexpected keyword arguments.
-        print(f"Warning: 'filename' is present in arguments. Using 'filename' as 'file_path' for function calls. 'filename' will be ignored in the function calls.")
- 
-    if "directory" in args and "working_directory" in args:
-        print(f"Warning: Both 'directory' and 'working_directory' are present in arguments. Using 'working_directory' for function calls. 'directory' will be ignored.")
-        args["file_path"] = args.pop("directory") # Remove "directory" from args if it exists, as it's not needed for the function calls and can cause issues with unexpected keyword arguments.
-   
-    if "directory" in args and "working_directory" not in args:
-        print(f"Warning: 'directory' is present in arguments but 'working_directory' is not. Using 'directory' as 'file_path' for function calls.")
-        args["working_directory"] = args.pop("directory")
-
 
     if function_call.name == "get_files_info":
         function_result = get_files_info(**args)  
+        
     if function_call.name == "run_python_file":
         function_result = run_python_file(**args)
     if function_call.name == "get_file_content":     
        function_result = get_file_content(**args)
+       
+    if "directory" in args and "working_directory" in args:
+     print(f"Warning: Both 'directory' and 'working_directory' are present in arguments. Using 'working_directory' for function calls. 'directory' will be ignored.")
+     args["file_path"] = args.pop("directory") # Remove "directory" from args if it exists, as it's not needed for the function calls and can cause issues with unexpected keyword arguments.   
     if function_call.name == "write_file":
-       function_result = write_file(**args)  
+       function_result = write_file(**args) 
     
                         
-    return types.Content(
+    return types.Content( 
         role="tool",
         parts=[
             types.Part.from_function_response(

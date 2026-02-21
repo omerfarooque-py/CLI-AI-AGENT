@@ -19,10 +19,10 @@ def get_file_content(working_directory, file_path):
             # Read up to 10,000 characters     
     except Exception as e:
         return f"Error: {str(e)}"
-    print(f"Content of '{response}':")
     if len(response) == 10000:
         response += f'[...File "{file_path}" truncated at {MAX_CHARS} characters]'
-    print(response)
+    return f"Content of '{file_path}': {response}"
+
 get_file_content("calculator", "lorem.txt")
 
 
