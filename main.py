@@ -53,9 +53,7 @@ def main():
         """
     max_attempts = 20    
     for i in range(0, max_attempts):# Allow up to 20 attempts   
-        if i == max_attempts - 1:
-            print("Maximum attempts reached. Exiting.")
-            return
+
         response = client.models.generate_content(
             model = 'gemini-2.5-flash',
             contents = messages,
@@ -74,18 +72,13 @@ def main():
             print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
             print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
 
+        messages.append(response.candidates[0].content)
         
-        if response.candidates:
-            for candidate in response.candidates:
-                if candidate is None or candidate.content is None:
-                    continue
-                messages.append(candidate.content)
-             
         if response.function_calls:
-            function_respone = []
+            tool_response = [] 
             for function_call in response.function_calls:
               function_call_result = call_function(function_call, verbose) 
-              function_respone.append(
+              tool_response.append(
                  types.Part.from_function_response(
                      name = function_call.name,
                      response = {"result": function_call_result}
@@ -93,23 +86,12 @@ def main():
              )
             messages.append(types.Content(
                 role="tool",
-                parts=function_respone
+                parts=tool_response
             ))
             continue
-
-              
-        try:      
-            if function_call_result.parts is not None:
-             print(f"Function call result: {function_call_result}")
-            if function_call_result.parts[0].response is not None and function_call_result.parts[0].response.get("result") is not None:
-             print(f"Function call response: {function_call_result.parts[0].response}")   
-            if args.verbose:
-             print(f"-> {function_call_result.parts[0].function_response.response}")          
-        except Exception as e:
-            print(f"Error processing function call result: {e}")
-        else:
-         print(response.text)
-      
-    
+        if response.text:
+            print(response.text)
+            break
+                 
 main()
 
